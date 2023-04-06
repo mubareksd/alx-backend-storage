@@ -1,4 +1,5 @@
 -- Creates trigger validate_email
+DROP TRIGGER IF EXISTS `validate_email`;
 DELIMITER $$
 CREATE TRIGGER `validate_email` BEFORE UPDATE ON `users`
 FOR EACH ROW
