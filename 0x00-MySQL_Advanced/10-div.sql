@@ -4,7 +4,7 @@ CREATE FUNCTION SafeDiv (a INTEGER, b INTEGER)
 RETURNS FLOAT DETERMINISTIC
 BEGIN
     DECLARE ret FLOAT;
-    IF b == 0 THEN
+    IF b = 0 THEN
        RETURN 0;
     END IF;
     ret = (a / b) * 1.0;
