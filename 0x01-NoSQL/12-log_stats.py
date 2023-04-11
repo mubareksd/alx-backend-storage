@@ -4,7 +4,8 @@
 from pymongo import MongoClient
 
 
-if __name__ == "__main__":
+def run():
+    """run function"""
     client = MongoClient("mongodb://127.0.0.1:27017")
     db = client.logs
     collection = db.nginx
@@ -16,3 +17,7 @@ if __name__ == "__main__":
         count = collection.count_documents({"method": method})
         print(f"\tmethod {count}")
     print(f"{status_check_count} status check")
+
+
+if __name__ == "__main__":
+    run()
