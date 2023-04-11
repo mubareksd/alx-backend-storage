@@ -13,7 +13,7 @@ def run():
     print("Methods:")
     for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
         count = nginx.count_documents({"method": method})
-        print("\tmethod {}".format(count))
+        print("\tmethod {}: {}".format(method, count))
     stats = nginx.count_documents({"path": "/status"})
     print("{} status check".format(stats))
 
