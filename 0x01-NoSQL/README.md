@@ -14,3 +14,4 @@
 | 9. Insert a document in Python  | [9-insert_school.py](9-insert_school.py)             | inserts a new document in a collection based on kwargs                      |
 | 10. Change school topics        | [10-update_topics.py](10-update_topics.py)           | changes all topics of a school document based on the name                   |
 | 11. Where can I learn Python?   | [11-schools_by_topic.py](11-schools_by_topic.py)     | returns the list of school having a specific topic                          |
+| 12. Log stats                   | [12-log_stats.py](12-log_stats.py)                   | provides some stats about Nginx logs stored in MongoDB                      |
