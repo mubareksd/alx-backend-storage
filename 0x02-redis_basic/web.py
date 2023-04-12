@@ -10,10 +10,18 @@ client = redis.Redis()
 
 
 def url_count(method: Callable) -> Callable:
-    """url_count function"""
+    """url_count function
+
+    Args:
+        method[Callable]:
+
+    returns:
+        Callable:
+    """
 
     @wraps(method)
     def wrapper(*args, **kwargs):
+        """wrapper decorated function"""
         url = args[0]
         client.incr(f"count:{url}")
         cached = client.get(f"{url}")
