@@ -56,6 +56,23 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
+def replay(method: Callable) -> None:
+    """replay function
+
+    Args:
+        method[Callable]:
+    """
+    key = method.__qualname__
+    inputs, outputs = key + ":inputs", key + ":outputs"
+    redis = method.__self__._redis
+    count = redis.get(key).decode("utf-8")
+    print(f"{key} was called {count} times:")
+    IOTuple = zip(redis.lrange(inputs, 0, -1), redis.lrange(outputs, 0, -1))
+    for inp, outp in list(IOTuple):
+        attr, data = inp.decode("utf-8"), outp.decode("utf-8")
+        print(f"{key}(*{attr}) -> {data}")
+
+
 class Cache:
     """Cache class"""
 

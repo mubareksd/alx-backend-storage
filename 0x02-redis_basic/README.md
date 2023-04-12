@@ -6,3 +6,4 @@
 | 1. Reading from Redis and recovering original type | [exercise.py](exercise.py) |             |
 | 2. Incrementing values                             | [exercise.py](exercise.py) |             |
 | 3. Storing lists                                   | [exercise.py](exercise.py) |             |
+| 4. Retrieving lists                                | [exercise.py](exercise.py) |             |
