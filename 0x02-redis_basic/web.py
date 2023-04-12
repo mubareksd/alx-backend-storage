@@ -24,7 +24,7 @@ def url_count(method: Callable) -> Callable:
         """wrapper decorated function"""
         url = args[0]
         client.incr(f"count:{url}")
-        cached = client.get(f"{url}")
+        cached = client.get(url)
         if cached:
             return cached.decode("utf-8")
         client.setex(url, 10, method(url))
