@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-""" web module """
+"""web module
+"""
 import redis
 import requests
 from functools import wraps
@@ -20,7 +21,8 @@ def url_count(method: Callable) -> Callable:
 
     @wraps(method)
     def wrapper(*args, **kwargs):
-        """wrapper decorated function"""
+        """wrapper decorated function
+        """
         url = args[0]
         meth = method(*args, **kwargs)
         client.incr(f"count:{url}")
