@@ -44,7 +44,8 @@ def get_page(url: str) -> str:
     Returns:
         str:
     """
-    return requests.get(url).text
+    response = requests.get(url)
+    return response.text
 
 
 if __name__ == "__main__":
