@@ -20,14 +20,15 @@ def url_count(method: Callable) -> Callable:
     """
 
     @wraps(method)
-    def wrapper(url):
+    def wrapper(*args, **kwargs):
         """wrapper decorated function"""
+        url = args[0]
         client.incr(f"count:{url}")
-        cached = client.get(url)
+        cached = client.get("cache:{url}")
         if cached:
             return cached.decode("utf-8")
-        client.setex(url, 10, method(url))
-        return method(url)
+        client.setex(f"cache:{url}", 10, method(*args, **kwargs))
+        return method(*args, **kwargs)
 
     return wrapper
 
