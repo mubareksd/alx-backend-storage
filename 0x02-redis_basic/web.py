@@ -3,12 +3,11 @@
 """
 from functools import wraps
 from typing import Callable
-
 import redis
 import requests
-from requests import Response
 
-_redis = redis.Redis(host="localhost", port=6379, db=0)
+
+client = redis.Redis()
 
 
 def url_count(method: Callable) -> Callable:
@@ -24,14 +23,13 @@ def url_count(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(*args, **kwargs):
         """wrapper decorated function"""
-        _redis.incr(f"count:{args[0]}")
-
-        html = _redis.get("html-cache:{args[0]}")
-        if html is not None:
-            return html.decode("utf-8")
-        html = method(*args, **kwargs)
-        _redis.setex(f"html-cache:{args[0]}", 10, html)
-        return html
+        url = args[0]
+        cache = client.get(f"cache:{url}")
+        if cache:
+            return cache.decode("utf-8")
+        client.incr(f"count:{url}")
+        client.setex(f"cache:{url}", 10, method(url))
+        return method(*args, **kwargs)
 
     return wrapper
 
@@ -46,8 +44,7 @@ def get_page(url: str) -> str:
     Returns:
         str:
     """
-    response: Response = requests.get(url)
-    return response.text
+    return requests.get(url).text
 
 
 if __name__ == "__main__":
