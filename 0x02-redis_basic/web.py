@@ -48,3 +48,7 @@ def get_page(url: str) -> str:
     """
     response: Response = requests.get(url)
     return response.text
+
+
+if __name__ == "__main__":
+    get_page("http://slowwly.robertomurray.co.uk")
