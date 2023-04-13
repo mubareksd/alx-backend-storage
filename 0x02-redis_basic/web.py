@@ -22,10 +22,10 @@ def url_count(method: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         """wrapper decorated function"""
         url = args[0]
+        client.incr(f"count:{url}")
         cache = client.get(f"cache:{url}")
         if cache:
             return cache.decode("utf-8")
-        client.incr(f"count:{url}")
         client.setex(f"cache:{url}", 10, method(url))
         return method(*args, **kwargs)
 
@@ -40,5 +40,8 @@ def get_page(url: str) -> str:
     Returns:
         str:
     """
-    response: Response = requests.get(url)
+    response = requests.get(url)
     return response.text
+
+if __name__ == '__main__':
+    get_page('http://google.com')
