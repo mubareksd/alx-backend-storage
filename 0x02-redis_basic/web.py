@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """web module
 """
-import redis
-from typing import Callable
-import requests
 from functools import wraps
+from typing import Callable
 
-client = redis.Redis()
+import redis
+import requests
+from requests import Response
+
+_redis = redis.Redis(host="localhost", port=6379, db=0)
 
 
 def url_count(method: Callable) -> Callable:
@@ -22,13 +24,14 @@ def url_count(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(*args, **kwargs):
         """wrapper decorated function"""
-        url = args[0]
-        client.incr(f"count:{url}")
-        cached = client.get("cache:{url}")
-        if cached:
-            return cached.decode("utf-8")
-        client.setex(f"cache:{url}", 10, method(*args, **kwargs))
-        return method(*args, **kwargs)
+        _redis.incr(f"count:{args[0]}")
+
+        html = _redis.get("html-cache:{args[0]}")
+        if html is not None:
+            return html.decode("utf-8")
+        html = method(*args, **kwargs)
+        _redis.setex(f"html-cache:{args[0]}", 10, html)
+        return html
 
     return wrapper
 
@@ -43,4 +46,5 @@ def get_page(url: str) -> str:
     Returns:
         str:
     """
-    return requests.get(url).text
+    response: Response = requests.get(url)
+    return response.text
