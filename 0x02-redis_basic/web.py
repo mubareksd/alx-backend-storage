@@ -4,50 +4,30 @@
 import requests
 import redis
 from functools import wraps
+from typing import Callable
 
-store = redis.Redis()
+_redis = redis.Redis()
 
 
-def count_url_access(method):
-    """count_url_access function
-
-    Args:
-        method (Callable): _description_
-
-    Returns:
-        Callable: _description_
+def count_requests(method: Callable) -> Callable:
+    """count_requests function
     """
     @wraps(method)
     def wrapper(url):
-        """wrapper decorated function
-
-        Returns:
-            _type_: _description_
+        """wrapper function
         """
-        cached_key = "cached:" + url
-        cached_data = store.get(cached_key)
-        if cached_data:
-            return cached_data.decode("utf-8")
-
-        count_key = "count:" + url
-        html = method(url)
-
-        store.incr(count_key)
-        store.set(cached_key, html)
-        store.expire(cached_key, 10)
-        return html
+        cached = _redis.get(f"cached:{url}")
+        if cached:
+            return cached.decode("utf-8")
+        _redis.incr(f"count:{url}")
+        _redis.setex(f"cached:{url}", 10, method(url))
+        return method(url)
     return wrapper
 
 
-@count_url_access
+@count_requests
 def get_page(url: str) -> str:
     """get_page function
-
-    Args:
-        url (str): _description_
-
-    Returns:
-        str: _description_
     """
-    res = requests.get(url)
-    return res.text
+    response = requests.get(url)
+    return response.text
