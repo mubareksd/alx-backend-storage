@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """web module
 """
-import redis
 import requests
+import redis
 from functools import wraps
-from requests import Response
-from typing import Callable
 
-_redis = redis.Redis(host='localhost', port=6379, db=0)
+store = redis.Redis()
 
 
-def counter(method: Callable) -> Callable:
-    """counter function
+def count_url_access(method: Callable) -> Callable:
+    """count_url_access function
 
     Args:
         method (Callable): _description_
@@ -20,25 +18,28 @@ def counter(method: Callable) -> Callable:
         Callable: _description_
     """
     @wraps(method)
-    def wrapper(*args, **kwargs):
+    def wrapper(url):
         """wrapper decorated function
 
         Returns:
             _type_: _description_
         """
-        _redis.incr(f"count:{args[0]}")
+        cached_key = "cached:" + url
+        cached_data = store.get(cached_key)
+        if cached_data:
+            return cached_data.decode("utf-8")
 
-        html = _redis.get("html-cache:{args[0]}")
-        if html is not None:
-            return html.decode("utf-8")
-        html = method(*args, **kwargs)
-        _redis.setex(f"html-cache:{args[0]}", 10, html)
+        count_key = "count:" + url
+        html = method(url)
+
+        store.incr(count_key)
+        store.set(cached_key, html)
+        store.expire(cached_key, 10)
         return html
-
     return wrapper
 
 
-@counter
+@count_url_access
 def get_page(url: str) -> str:
     """get_page function
 
@@ -48,5 +49,5 @@ def get_page(url: str) -> str:
     Returns:
         str: _description_
     """
-    response: Response = requests.get(url)
-    return response.text
+    res = requests.get(url)
+    return res.text
