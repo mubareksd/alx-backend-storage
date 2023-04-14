@@ -27,8 +27,6 @@ def count_requests(method: Callable) -> Callable:
         """
         url = args[0]
         cached = _redis.get(f"{url}")
-        if cached:
-            return cached.decode("utf-8")
         response = method(*args, **kwargs)
         _redis.incr(f"count:{url}")
         _redis.setex(f"{url}", 10, response)
