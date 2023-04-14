@@ -18,16 +18,16 @@ def count(method: Callable) -> Callable:
     returns:
         Callable:
     """
-
     @wraps(method)
     def wrapper(*args, **kwargs):
         """wrapper decorated function"""
         url = args[0]
-        _redis.incr("count:{}".format(url))
         cached = _redis.get("cache:{}".format(url))
         if cached:
             return cached.decode("utf-8")
-        _redis.setex("cache:{}".format(url), 10, method(url))
+        _redis.incr("count:{}".format(url))
+        _redis.set("cache:{}".format(url), method(url))
+        _redis.expire("cache:{}".format(url), 10)
         return method(*args, **kwargs)
 
     return wrapper
@@ -43,7 +43,3 @@ def get_page(url: str) -> str:
     """
     response: Response = requests.get(url)
     return response.text
-
-
-if __name__ == "__main__":
-    get_page("http://google.com")
