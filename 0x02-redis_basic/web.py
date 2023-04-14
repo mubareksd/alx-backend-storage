@@ -11,33 +11,27 @@ _redis = redis.Redis()
 
 def count(method):
     """count function
-    Args:
-        method[Callable]:
-    returns:
-        Callable:
     """
     @wraps(method)
     def wrapper(url):
-        """wrapper decorated function"""
-        url = args[0]
-        cache_key = "cache" + url
-        cached = _redis.get(cache_key)
-        if cached:
-            return cached.decode("utf-8")
-        _redis.incr("count:{}".format(url))
-        _redis.set(cache_key, method(url))
-        _redis.expire(cache_key, 10)
-        return method(url)
+        cached_key = "cached:" + url
+        cached_data = _redis.get(cached_key)
+        if cached_data:
+            return cached_data.decode("utf-8")
+
+        count_key = "count:" + url
+        html = method(url)
+
+        _redis.incr(count_key)
+        _redis.set(cached_key, html)
+        _redis.expire(cached_key, 10)
+        return html
     return wrapper
 
 
 @count
 def get_page(url: str) -> str:
     """get_page function
-    Args:
-        url[str]:
-    Returns:
-        str:
     """
     response = requests.get(url)
     return response.text
