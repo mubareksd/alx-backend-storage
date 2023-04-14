@@ -4,14 +4,12 @@
 import redis
 import requests
 from functools import wraps
-from requests import Response
-from typing import Callable
 
 
 _redis = redis.Redis()
 
 
-def count(method: Callable) -> Callable:
+def count(method):
     """count function
     Args:
         method[Callable]:
@@ -41,5 +39,5 @@ def get_page(url: str) -> str:
     Returns:
         str:
     """
-    response: Response = requests.get(url)
+    response = requests.get(url)
     return response.text
