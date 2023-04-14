@@ -4,34 +4,49 @@
 import redis
 import requests
 from functools import wraps
+from requests import Response
+from typing import Callable
+
+_redis = redis.Redis(host='localhost', port=6379, db=0)
 
 
-_redis = redis.Redis()
+def counter(method: Callable) -> Callable:
+    """counter function
 
+    Args:
+        method (Callable): _description_
 
-def count(method):
-    """count function
+    Returns:
+        Callable: _description_
     """
     @wraps(method)
-    def wrapper(url):
-        cached_key = "cached:" + url
-        cached_data = _redis.get(cached_key)
-        if cached_data:
-            return cached_data.decode("utf-8")
+    def wrapper(*args, **kwargs):
+        """wrapper decorated function
 
-        count_key = "count:" + url
-        html = method(url)
+        Returns:
+            _type_: _description_
+        """
+        _redis.incr(f"count:{args[0]}")
 
-        _redis.incr(count_key)
-        _redis.set(cached_key, html)
-        _redis.expire(cached_key, 10)
+        html = _redis.get("html-cache:{args[0]}")
+        if html is not None:
+            return html.decode("utf-8")
+        html = method(*args, **kwargs)
+        _redis.setex(f"html-cache:{args[0]}", 10, html)
         return html
+
     return wrapper
 
 
-@count
+@counter
 def get_page(url: str) -> str:
     """get_page function
+
+    Args:
+        url (str): _description_
+
+    Returns:
+        str: _description_
     """
-    response = requests.get(url)
+    response: Response = requests.get(url)
     return response.text
