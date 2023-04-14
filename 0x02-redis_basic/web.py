@@ -17,7 +17,7 @@ def count(method):
         Callable:
     """
     @wraps(method)
-    def wrapper(*args, **kwargs):
+    def wrapper(url):
         """wrapper decorated function"""
         url = args[0]
         cache_key = "cache" + url
@@ -25,9 +25,9 @@ def count(method):
         if cached:
             return cached.decode("utf-8")
         _redis.incr("count:{}".format(url))
-        _redis.set(cache_key, method(*args, **kwargs))
+        _redis.set(cache_key, method(url))
         _redis.expire(cache_key, 10)
-        return method(*args, **kwargs)
+        return method(url)
     return wrapper
 
 
