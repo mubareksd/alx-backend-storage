@@ -11,23 +11,44 @@ _redis = redis.Redis()
 
 def count_requests(method: Callable) -> Callable:
     """count_requests function
+
+    Args:
+        method (Callable): method
+
+    Returns:
+        Callable: wrapper
     """
     @wraps(method)
-    def wrapper(url):
+    def wrapper(*args, **kwargs):
         """wrapper function
+
+        Returns:
+            [type]: wrapper
         """
+        url = args[0]
         cached = _redis.get(f"cached:{url}")
         if cached:
             return cached.decode("utf-8")
+        response = method(*args, **kwargs)
         _redis.incr(f"count:{url}")
-        _redis.setex(f"cached:{url}", 10, method(url))
-        return method(url)
+        _redis.setex(f"cached:{url}", 10, response)
+        return response
     return wrapper
 
 
 @count_requests
 def get_page(url: str) -> str:
     """get_page function
+
+    Args:
+        url (str): url
+
+    Returns:
+        str: response
     """
     response = requests.get(url)
     return response.text
+
+
+if __name__ == '__main__':
+    get_page("http://google.com")
