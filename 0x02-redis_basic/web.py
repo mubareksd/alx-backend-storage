@@ -25,7 +25,7 @@ def count(method):
         if cached:
             return cached.decode("utf-8")
         _redis.incr("count:{}".format(url))
-        _redis.set(cache_key, method(url))
+        _redis.set(cache_key, method(*args, **kwargs))
         _redis.expire(cache_key, 10)
         return method(*args, **kwargs)
     return wrapper
