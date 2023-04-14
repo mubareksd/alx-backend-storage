@@ -20,14 +20,14 @@ def count(method):
     def wrapper(*args, **kwargs):
         """wrapper decorated function"""
         url = args[0]
-        cached = _redis.get("cache:{}".format(url))
+        cache_key = "cache" + url
+        cached = _redis.get(cache_key)
         if cached:
             return cached.decode("utf-8")
         _redis.incr("count:{}".format(url))
-        _redis.set("cache:{}".format(url), method(url))
-        _redis.expire("cache:{}".format(url), 10)
+        _redis.set(cache_key, method(url))
+        _redis.expire(cache_key, 10)
         return method(*args, **kwargs)
-
     return wrapper
 
 
