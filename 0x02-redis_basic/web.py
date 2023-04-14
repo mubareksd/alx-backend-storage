@@ -8,7 +8,7 @@ from functools import wraps
 store = redis.Redis()
 
 
-def count_url_access(method: Callable) -> Callable:
+def count_url_access(method):
     """count_url_access function
 
     Args:
