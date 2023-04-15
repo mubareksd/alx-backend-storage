@@ -7,6 +7,7 @@ from functools import wraps
 from typing import Callable
 
 _redis = redis.Redis()
+_redis.flushdb()
 
 
 def count_requests(method: Callable) -> Callable:
