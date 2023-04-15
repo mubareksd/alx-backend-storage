@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """web module
 """
-import requests
 import redis
+import requests
 from functools import wraps
 from typing import Callable
 
@@ -26,12 +26,12 @@ def count_requests(method: Callable) -> Callable:
             [type]: wrapper
         """
         url = args[0]
-        cached = _redis.get(url)
+        cached = _redis.get("cached:{url}".format(url))
         if cached:
             return cached.decode("utf-8")
         response = method(*args, **kwargs)
         _redis.incr("count:{}".format(url))
-        _redis.setex(url, 10, response)
+        _redis.setex("cached:{url}".format(url), 10, response)
         return response
     return wrapper
 
@@ -51,4 +51,4 @@ def get_page(url: str) -> str:
 
 
 if __name__ == '__main__':
-    get_page("http://google.com")
+    get_page('http://slowwly.robertomurray.co.uk')
