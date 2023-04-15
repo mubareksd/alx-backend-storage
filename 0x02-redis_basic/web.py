@@ -20,17 +20,16 @@ def count_requests(method: Callable) -> Callable:
         Callable: wrapper
     """
     @wraps(method)
-    def wrapper(*args, **kwargs):
+    def wrapper(url):
         """wrapper function
 
         Returns:
             [type]: wrapper
         """
-        url = args[0]
         cached = _redis.get("cached:{url}".format(url))
         if cached:
             return cached.decode("utf-8")
-        response = method(*args, **kwargs)
+        response = method(url)
         _redis.incr("count:{}".format(url))
         _redis.setex("cached:{url}".format(url), 10, response)
         return response
