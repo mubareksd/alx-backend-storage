@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """web module
 """
-import redis
-import requests
 from functools import wraps
 from typing import Callable
+import redis
+import requests
 
 _redis = redis.Redis()
 _redis.flushdb()
@@ -27,12 +27,12 @@ def count_requests(method: Callable) -> Callable:
             [type]: wrapper
         """
         url = args[0]
-        cached = _redis.get("cached:{url}".format(url))
+        cached = _redis.get(f"cached:{url}")
         if cached:
             return cached.decode("utf-8")
         response = method(*args, **kwargs)
-        _redis.incr("count:{}".format(url))
-        _redis.setex("cached:{url}".format(url), 10, response)
+        _redis.incr(f"count:{url}")
+        _redis.setex(f"cached:{url}", 10, response)
         return response
     return wrapper
 
@@ -47,9 +47,5 @@ def get_page(url: str) -> str:
     Returns:
         str: response
     """
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     return response.text
-
-
-if __name__ == '__main__':
-    get_page('http://slowwly.robertomurray.co.uk')
